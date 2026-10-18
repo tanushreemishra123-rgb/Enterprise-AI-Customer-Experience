@@ -1,0 +1,5 @@
+﻿.env
+__pycache__/
+*.py[cod]
+starter-solution/events.jsonl
+starter-solution/escalations.jsonl

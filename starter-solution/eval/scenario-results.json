@@ -1,0 +1,34 @@
+[
+  {
+    "scenario": "SCN-001",
+    "passed": true
+  },
+  {
+    "scenario": "SCN-002",
+    "passed": true
+  },
+  {
+    "scenario": "SCN-003",
+    "passed": true
+  },
+  {
+    "scenario": "SCN-004",
+    "passed": true
+  },
+  {
+    "scenario": "SCN-005",
+    "passed": true
+  },
+  {
+    "scenario": "SCN-006",
+    "passed": true
+  },
+  {
+    "scenario": "SCN-007",
+    "passed": true
+  },
+  {
+    "scenario": "SCN-008",
+    "passed": true
+  }
+]
