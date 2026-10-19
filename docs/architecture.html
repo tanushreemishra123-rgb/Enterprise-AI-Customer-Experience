@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gemini CX — Resolution Desk Architecture</title>
+  <style>
+    :root { color-scheme: light; --ink:#15263c; --muted:#52657d; --line:#6b7787; --page:#f4f7fa; }
+    * { box-sizing:border-box; }
+    body { margin:0; padding:24px; background:#e9eef4; color:var(--ink); font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif; }
+    main { max-width:1480px; margin:0 auto; }
+    header { text-align:center; padding:8px 12px 18px; }
+    h1 { margin:0; font-size:clamp(1.35rem,2.4vw,2rem); }
+    header p { margin:7px 0 0; color:var(--muted); }
+    .diagram { overflow-x:auto; border:1px solid #d5dee8; border-radius:14px; background:var(--page); box-shadow:0 8px 28px #17345212; }
+    svg { display:block; width:100%; min-width:980px; height:auto; }
+    .box { stroke-width:2; rx:15; }
+    .blue { fill:#e8f0ff; stroke:#4380ff; }
+    .green { fill:#eaf8ef; stroke:#28bd57; }
+    .orange { fill:#fff6e7; stroke:#e39a12; }
+    .purple { fill:#f3ecff; stroke:#9051ef; }
+    .red { fill:#fff0f0; stroke:#ff5656; }
+    .gray { fill:#f0f4f7; stroke:#91a1b3; }
+    .gcp { fill:#f7f5ff; stroke:#6552cc; stroke-dasharray:9 7; stroke-width:2.5; }
+    .title { fill:#16263b; font-size:17px; font-weight:700; text-anchor:middle; }
+    .copy { fill:#50627a; font-size:13px; text-anchor:middle; }
+    .small { fill:#61738a; font-size:12px; }
+    .arrow { fill:none; stroke:var(--line); stroke-width:2; marker-end:url(#arrow); }
+    .dash { fill:none; stroke:#8b6bd1; stroke-width:2; stroke-dasharray:7 6; marker-end:url(#purpleArrow); }
+    .group-title { fill:#463997; font-size:17px; font-weight:700; }
+    .legend { display:flex; gap:18px; flex-wrap:wrap; padding:14px 18px; color:var(--muted); font-size:.9rem; }
+    .dot { display:inline-block; width:12px; height:12px; margin-right:6px; border-radius:4px; vertical-align:-1px; }
+    .note { margin:14px 4px 0; color:#43566e; font-size:.93rem; }
+    @media (max-width:700px) { body { padding:12px; } .legend { gap:10px; } }
+  </style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Gemini CX — Resolution Desk Architecture</h1>
+    <p>Gemini interprets requests; deterministic application code controls access and actions.</p>
+  </header>
+  <div class="diagram" role="img" aria-label="Architecture diagram showing the current local proof of capability and a proposed Google Cloud production mapping.">
+  <svg viewBox="0 0 1440 970" xmlns="http://www.w3.org/2000/svg" aria-labelledby="svgTitle svgDesc">
+    <title id="svgTitle">Resolution Desk architecture</title>
+    <desc id="svgDesc">Customer requests enter the local Python server and deterministic workflow. Gemini classifies requests. Controlled adapters call supplied mock services. Sanitized events feed local traces and metrics. A separate dashed boundary maps a future Google Cloud deployment and is not provisioned.</desc>
+    <defs>
+      <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#6b7787"/></marker>
+      <marker id="purpleArrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0 L10 5 L0 10 z" fill="#8b6bd1"/></marker>
+    </defs>
+
+    <!-- Current runnable local proof of capability -->
+    <rect class="box gray" x="26" y="24" width="900" height="918" rx="22"/>
+    <text class="group-title" x="52" y="58">Current local proof of capability</text>
+    <rect class="box blue" x="338" y="78" width="280" height="72"/>
+    <text class="title" x="478" y="108">Customer / support browser</text>
+    <text class="copy" x="478" y="130">Resolution Desk UI · HTTP</text>
+
+    <rect class="box gray" x="286" y="184" width="384" height="82"/>
+    <text class="title" x="478" y="215">starter-solution/server.py</text>
+    <text class="copy" x="478" y="239">Python stdlib HTTP entry · session cookie · API routes</text>
+    <path class="arrow" d="M478 150 V180"/>
+
+    <rect class="box green" x="208" y="302" width="540" height="116"/>
+    <text class="title" x="478" y="333">Workflow engine · cx/engine.py</text>
+    <text class="copy" x="478" y="357">Conversation state · routing · clarification and confirmation</text>
+    <text class="copy" x="478" y="380">Chooses narrow workflows · composes verified responses · handles escalation</text>
+    <path class="arrow" d="M478 266 V298"/>
+
+    <rect class="box orange" x="54" y="478" width="246" height="116"/>
+    <text class="title" x="177" y="510">Gemini provider</text>
+    <text class="copy" x="177" y="534">Live structured intent output</text>
+    <text class="copy" x="177" y="555">Reviewer / degraded deterministic</text>
+    <text class="copy" x="177" y="576">Validated schema · bounded input</text>
+    <path class="arrow" d="M376 418 L258 474"/>
+    <text class="small" x="286" y="450">classify only</text>
+
+    <rect class="box red" x="350" y="464" width="256" height="91"/>
+    <text class="title" x="478" y="496">Deterministic security</text>
+    <text class="copy" x="478" y="520">Authentication · role · account ownership</text>
+    <text class="copy" x="478" y="541">Permission checks before protected access</text>
+    <path class="arrow" d="M478 418 V460"/>
+
+    <rect class="box green" x="654" y="478" width="246" height="116"/>
+    <text class="title" x="777" y="510">Workflow adapters</text>
+    <text class="copy" x="777" y="534">Account · billing · network</text>
+    <text class="copy" x="777" y="555">Case actions require confirmation</text>
+    <text class="copy" x="777" y="576">Bounded retry · idempotency</text>
+    <path class="arrow" d="M580 418 L720 474"/>
+
+    <rect class="box red" x="350" y="620" width="256" height="96"/>
+    <text class="title" x="478" y="653">Controlled action gate</text>
+    <text class="copy" x="478" y="677">Authorize → validate → execute → verify</text>
+    <text class="copy" x="478" y="699">No model-selected arbitrary tool calls</text>
+    <path class="arrow" d="M777 594 L606 649"/>
+    <path class="arrow" d="M478 555 V616"/>
+
+    <rect class="box gray" x="170" y="776" width="280" height="92"/>
+    <text class="title" x="310" y="808">Enterprise REST adapters</text>
+    <text class="copy" x="310" y="832">Validate and normalize supplied mock APIs</text>
+    <text class="copy" x="310" y="852">Timeouts · retries · error mapping</text>
+
+    <rect class="box gray" x="506" y="776" width="280" height="92"/>
+    <text class="title" x="646" y="808">Legacy XML adapter</text>
+    <text class="copy" x="646" y="832">Safe parse · identity check · normalize</text>
+    <text class="copy" x="646" y="852">No raw XML returned to the workflow</text>
+    <path class="arrow" d="M440 716 L340 772"/>
+    <path class="arrow" d="M516 716 L615 772"/>
+
+    <rect class="box blue" x="330" y="884" width="300" height="46"/>
+    <text class="title" x="480" y="913">Supplied synthetic mock services and data</text>
+    <path class="arrow" d="M310 868 L410 880"/>
+    <path class="arrow" d="M646 868 L550 880"/>
+
+    <rect class="box purple" x="964" y="78" width="426" height="330"/>
+    <text class="title" x="1177" y="111">Telemetry and support operations</text>
+    <text class="copy" x="1177" y="145">Sanitized, correlated workflow events</text>
+    <text class="copy" x="1177" y="172">Hashed session reference · trace IDs</text>
+    <text class="copy" x="1177" y="199">Local JSONL event and escalation files</text>
+    <text class="copy" x="1177" y="226">Event-derived metrics and integration failures</text>
+    <text class="copy" x="1177" y="253">Support-only traces, metrics, escalation view</text>
+    <text class="copy" x="1177" y="280">Gemini model, latency, retries and failures</text>
+    <text class="copy" x="1177" y="324">No session cookie or raw session ID in traces</text>
+    <path class="dash" d="M748 350 C850 350 875 244 958 244"/>
+    <text class="small" x="834" y="320">sanitized events</text>
+    <path class="dash" d="M900 535 C946 535 918 368 958 368"/>
+
+    <!-- Future deployment mapping -->
+    <rect class="box gcp" x="964" y="458" width="426" height="472" rx="22"/>
+    <text class="group-title" x="990" y="493">Proposed Google Cloud mapping</text>
+    <text class="small" x="990" y="516">Documented target only · not provisioned</text>
+
+    <rect class="box blue" x="1040" y="542" width="274" height="58"/>
+    <text class="title" x="1177" y="568">API Gateway / Apigee</text>
+    <text class="copy" x="1177" y="588">External request boundary</text>
+    <rect class="box green" x="1040" y="628" width="274" height="68"/>
+    <text class="title" x="1177" y="656">Cloud Run application</text>
+    <text class="copy" x="1177" y="680">Same deterministic orchestrator and controls</text>
+    <path class="arrow" d="M1177 600 V624"/>
+
+    <rect class="box orange" x="990" y="730" width="184" height="70"/>
+    <text class="title" x="1082" y="758">Vertex AI Gemini</text>
+    <text class="copy" x="1082" y="781">Structured interpretation</text>
+    <rect class="box gray" x="1190" y="730" width="174" height="70"/>
+    <text class="title" x="1277" y="758">Identity + Secret</text>
+    <text class="copy" x="1277" y="781">Identity Platform · Secret Manager</text>
+    <path class="arrow" d="M1130 696 L1088 726"/>
+    <path class="arrow" d="M1224 696 L1260 726"/>
+
+    <rect class="box gray" x="990" y="826" width="184" height="70"/>
+    <text class="title" x="1082" y="854">Durable state</text>
+    <text class="copy" x="1082" y="877">Cloud SQL / Firestore</text>
+    <rect class="box purple" x="1190" y="826" width="174" height="70"/>
+    <text class="title" x="1277" y="854">Operations telemetry</text>
+    <text class="copy" x="1277" y="877">Pub/Sub · Logging · Trace · Monitoring</text>
+    <path class="arrow" d="M1128 696 L1082 822"/>
+    <path class="arrow" d="M1226 696 L1277 822"/>
+  </svg>
+  </div>
+  <div class="legend">
+    <span><i class="dot" style="background:#e8f0ff;border:1px solid #4380ff"></i>Entry points and supplied services</span>
+    <span><i class="dot" style="background:#eaf8ef;border:1px solid #28bd57"></i>Workflow and adapters</span>
+    <span><i class="dot" style="background:#fff0f0;border:1px solid #ff5656"></i>Deterministic security controls</span>
+    <span><i class="dot" style="background:#f3ecff;border:1px solid #9051ef"></i>Telemetry and operations</span>
+    <span><i class="dot" style="background:#f7f5ff;border:1px dashed #6552cc"></i>Proposed, not deployed</span>
+  </div>
+  <p class="note"><strong>Current implementation:</strong> local Python app, supplied mock enterprise services, direct Gemini API integration, reviewer and degraded classifiers, in-memory session/workflow state, and local JSONL telemetry. <strong>Production mapping:</strong> the Google Cloud components shown in the dashed boundary are a documented target architecture; this repository does not provision them.</p>
+</main>
+</body>
+</html>

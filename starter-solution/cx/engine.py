@@ -27,7 +27,8 @@ def _escalate(trace_id, session_id, state, reason, systems, next_step):
 
 
 def _result(answer, trace_id, session_id, mode, **extra):
-    return {"answer":answer,"traceId":trace_id,"sessionId":session_id,"mode":mode,**extra}
+    # Session credentials stay in the HttpOnly cookie and server-side session store.
+    return {"answer":answer,"traceId":trace_id,"mode":mode,**extra}
 
 
 def _issue(message, intent, user_state, trace_id, session_id, mode, account_id):

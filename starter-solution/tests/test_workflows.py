@@ -80,8 +80,10 @@ class WorkflowTests(unittest.TestCase):
 
     def test_grounded_plan_uses_enterprise_value(self):
         with patch("cx.enterprise.account",return_value=self.account):
-            _,result=engine.process("What internet plan am I currently using?",self.state,"T","S")
+            _,result=engine.process("What internet plan am I currently using?",self.state,"T","raw-cookie-session-id")
         self.assertIn("Fiber 500",result["answer"]);self.assertEqual(result["evidence"]["source"],"account-service")
+        self.assertNotIn("sessionId",result)
+        self.assertNotIn("raw-cookie-session-id",str(result))
 
     def test_clarification_resumes_saved_issue(self):
         _,first=engine.process("My service is not working",self.state,"T1","S")
@@ -146,10 +148,23 @@ class TelemetryTests(unittest.TestCase):
     def test_sensitive_event_metadata_is_redacted(self):
         emit("auth.attempted","T","S",metadata={"password":"DUMMY_SECRET"})
         self.assertNotIn("DUMMY_SECRET",str(trace("T")))
+    def test_session_ids_are_hashed_and_correlatable(self):
+        raw_session_id="raw-cookie-session-id"
+        emit("request.received","T",raw_session_id)
+        emit("workflow.resolved","T",raw_session_id)
+        events=trace("T")
+        references={event["sessionId"] for event in events}
+        self.assertEqual(len(references),1)
+        self.assertTrue(next(iter(references)).startswith("sess-"))
+        self.assertNotIn(raw_session_id,str(events))
     def test_metrics_are_derived_from_real_events(self):
         self.assertEqual(metrics()["totalRequests"],0)
         emit("request.received","T","S");emit("workflow.resolved","T","S")
+        emit("gemini.completed","T","S","gemini",duration_ms=25)
+        emit("tool.failed","T","S","billing","failure",metadata={"tool":"billing"})
         self.assertEqual(metrics()["totalRequests"],1);self.assertEqual(metrics()["resolved"],1)
+        self.assertEqual(metrics()["averageGeminiLatencyMs"],25)
+        self.assertEqual(metrics()["failuresByIntegration"],{"billing":1})
 
 
 if __name__=="__main__": unittest.main()

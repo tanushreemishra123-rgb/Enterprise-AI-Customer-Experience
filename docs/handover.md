@@ -24,4 +24,4 @@ Sign in as `support.agent`, open the operations panels, locate the trace ID retu
 
 ## Known limits and roadmap
 
-The app uses process memory for sessions, local JSONL for telemetry, a synthetic identity service, and a single Python HTTP server. The live Gemini adapter is implemented but needs participant credentials and a recorded execution. Recommended sequence: persist workflow and idempotency state, add distributed trace export, deploy behind an authenticated gateway on Cloud Run, then run security and load reviews with approved synthetic data.
+The app uses process memory for sessions, local JSONL for telemetry, a synthetic identity service, and a single Python HTTP server. A participant-captured Gemini live execution is included; reproducing live mode requires the participant's Gemini API credential. Recommended production sequence: persist workflow and idempotency state, add distributed trace export, deploy behind an authenticated gateway on Cloud Run, then run security and load reviews with approved synthetic data.

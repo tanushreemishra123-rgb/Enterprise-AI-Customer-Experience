@@ -13,6 +13,14 @@ py -3 -m pip install -r requirements.txt
 
 The legacy XML adapter uses `defusedxml`. Do not skip the dependency installation.
 
+### Third-party dependencies and licenses
+
+| Package | Version | Purpose | License |
+|---|---:|---|---|
+| `defusedxml` | 0.7.1 | Safe parsing of legacy XML responses | Python Software Foundation License (PSFL) |
+
+The rest of the application and test suite use the Python standard library. The Gemini integration uses HTTPS directly and does not require the optional Google SDK.
+
 ## Run locally
 
 Open two PowerShell windows. In each, go to the project root:
@@ -51,6 +59,10 @@ Stop either process with **Ctrl+C** in its PowerShell window.
 AI mode is selected by the app's environment configuration; it is independent of the signed-in role. A support agent can use reviewer, live, or degraded mode. Set the mode in the same PowerShell window used to start the app. Stop and restart the app when switching modes.
 
 The app exposes its mode at `http://localhost:8080/mode`. The customer conversation also includes the mode used for a request, and traces record Gemini success or failure and fallback classification.
+
+### Gemini integration and orchestration
+
+`starter-solution/cx/ai.py` sends a bounded, redacted customer message to Gemini with a structured JSON schema for intent, service, account reference, and summary. The app validates the response before using it. `starter-solution/cx/engine.py` owns conversation state and selects narrow enterprise adapters; authentication, account ownership, confirmation, and action permissions are enforced by deterministic application code, not by Gemini. The adapters call the supplied account, billing, network, case, and legacy XML mock services, validate and normalize their responses, and provide verified facts for the customer reply. Provider or service failures are traced and safely degraded or escalated.
 
 ### Reviewer mode
 
@@ -99,7 +111,7 @@ From the project root, run the unit tests:
 py -3 -m unittest discover -s starter-solution/tests -v
 ```
 
-The expected result is 28 tests passing (`OK`). Then run the supplied scenario evaluator. It starts its own mock service, so do not start another mock service for this command:
+The latest saved result is 29 tests passing (`OK`); the exact count may change if tests are added. Then run the supplied scenario evaluator. It starts its own mock service, so do not start another mock service for this command:
 
 ```powershell
 py -3 starter-solution/eval/run_scenarios.py
@@ -127,17 +139,18 @@ Mock failure controls are set in the mock service process: `MOCK_AUTH_MODE=expir
 - `/health`: application health and configured mode
 - `/mode`: current AI mode indicator
 - `/metrics`, `/traces`, `/trace/<traceId>`, `/escalations`: support-agent-only operations APIs, backed by workflow events
+- The operations view derives failure counts by integration and average Gemini latency from emitted events, alongside request, failure, escalation, retry, and tool-call metrics.
 - `starter-solution/events.jsonl`: sanitized local event stream
 - `starter-solution/escalations.jsonl`: local support handoffs
 - `scenarios/SCN-001.json` through `scenarios/SCN-008.json`: mandatory scenario definitions
 
-Store test output, redacted screenshots, live Gemini evidence, and the demo link in the submission evidence package. The demo video may be included in the submission ZIP or linked from the README; ensure a link is accessible without requesting permission. Never store active credentials, session cookies, or real customer data in the evidence package.
+Store test output, redacted screenshots, live Gemini evidence, and the demo link in the submission evidence package. The captured scenario screenshots are indexed in [`evidence/screenshots/README.md`](evidence/screenshots/README.md), and the requirement-to-evidence matrix is in [`docs/requirement-to-evidence.md`](docs/requirement-to-evidence.md). The demo video may be included in the submission ZIP or linked from the README; ensure a link is accessible without requesting permission. Never store active credentials, session cookies, or real customer data in the evidence package.
 
 The 3–5 minute demo should show a grounded inquiry, clarification, protected action confirmation, authorization denial, legacy processing, a simulated failure and escalation, traces and event-derived metrics, and reviewer mode. Include live-mode evidence captured with participant credentials.
 
 ## Architecture, security, and handover
 
-See [docs/architecture.md](docs/architecture.md), [docs/deployment.md](docs/deployment.md), [docs/handover.md](docs/handover.md), [docs/live-evidence.md](docs/live-evidence.md), [docs/requirement-to-evidence.md](docs/requirement-to-evidence.md), and [docs/security-expectations.md](docs/security-expectations.md).
+See [docs/architecture.md](docs/architecture.md) for the written design and [open the visual architecture diagram](docs/architecture.html). Also see [docs/deployment.md](docs/deployment.md), [docs/handover.md](docs/handover.md), [docs/live-evidence.md](docs/live-evidence.md), [docs/requirement-to-evidence.md](docs/requirement-to-evidence.md), [docs/summary-of-changes.md](docs/summary-of-changes.md), [docs/known-gaps.md](docs/known-gaps.md), and [docs/security-expectations.md](docs/security-expectations.md).
 
 The Gemini model never receives authentication tokens. Account ownership is checked in application code before protected retrieval. Consequential actions require server-side confirmation and use idempotency keys. The legacy XML adapter uses `defusedxml` and normalizes responses before workflow use. The local mock backend, in-memory sessions, and JSONL telemetry are demonstration choices, not production persistence.
 

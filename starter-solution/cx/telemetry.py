@@ -1,5 +1,6 @@
 """Schema-checked, redacted workflow events and derived operational metrics."""
 import datetime as dt
+import hashlib
 import json
 import re
 import threading
@@ -20,6 +21,14 @@ _PHONE = re.compile(r"\b(?:\+?\d[\d ()-]{7,}\d)\b")
 _ALLOWED_STATUS = {"success", "failure", "pending", "denied"}
 
 
+def _session_reference(session_id):
+    """Return a stable, non-reversible reference instead of a cookie value."""
+    value = str(session_id or "system")
+    if value == "system":
+        return value
+    return "sess-" + hashlib.sha256(value.encode("utf-8")).hexdigest()[:24]
+
+
 def redact(value):
     if isinstance(value, dict):
         return {k: ("[REDACTED]" if any(x in str(k).lower() for x in ("password", "token", "secret", "credential", "cookie", "api_key", "idempotency")) else redact(v)) for k, v in value.items()}
@@ -35,7 +44,7 @@ def emit(event_type, trace_id, session_id="system", component="orchestrator", st
     if duration_ms is None and event_type.startswith("workflow.") and trace_id in _STARTED:
         duration_ms=(time.perf_counter()-_STARTED.pop(trace_id))*1000
     event = {"eventId": "EVT-" + uuid.uuid4().hex[:12], "traceId": trace_id,
-             "sessionId": session_id, "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(),
+             "sessionId": _session_reference(session_id), "timestamp": dt.datetime.now(dt.timezone.utc).isoformat(),
              "eventType": event_type, "component": component, "status": status}
     if duration_ms is not None: event["durationMs"] = max(0, round(float(duration_ms), 2))
     if metadata: event["metadata"] = redact(metadata)
@@ -80,15 +89,17 @@ def metrics():
     failures_by={}
     for e in events:
         if e["eventType"]=="tool.failed":
-            tool=e.get("metadata",{}).get("tool",e["component"]);failures_by[tool]=failures_by.get(tool,0)+1
+            tool_name=e.get("metadata",{}).get("tool",e["component"]);failures_by[tool_name]=failures_by.get(tool_name,0)+1
     failed_traces=sum(any(e["eventType"]=="tool.failed" for e in v) for v in requests)
     durations=[e["durationMs"] for e in events if e["eventType"].startswith("workflow.") and "durationMs" in e]
+    gemini_durations=[e["durationMs"] for e in events if e["eventType"] in {"gemini.completed", "gemini.failed"} and "durationMs" in e]
     return {"totalSessions": len({e["sessionId"] for e in events if e["sessionId"] != "system"}),
             "totalRequests": total, "resolved": resolved, "escalations": escalated,
             "resolutionRate": round(resolved / total, 3) if total else 0,
             "escalationRate": round(escalated / total, 3) if total else 0,
             "failureRate": round(failed_traces/total,3) if total else 0,
             "averageWorkflowDurationMs": round(sum(durations)/len(durations),1) if durations else 0,
+            "averageGeminiLatencyMs": round(sum(gemini_durations)/len(gemini_durations),1) if gemini_durations else 0,
             "failuresByIntegration": failures_by,
             "toolCallSuccessRate": round(sum(e["status"] == "success" for e in tool) / len(tool), 3) if tool else 0,
             "authenticationFailures": types["authentication.failed"], "authorizationDenials": types["authorization.denied"],

@@ -1,21 +1,63 @@
 # Architecture
 
+For a visual, browser-openable diagram, see [architecture.html](architecture.html). It shows the runnable local proof of capability separately from the proposed Google Cloud production mapping.
+
 ```mermaid
 flowchart LR
-  C[Customer browser] --> W[HTTP handler and cookie session]
-  W --> O[Workflow engine]
-  O --> G[Gemini JSON adapter]
-  O --> Z[Reviewer / degraded classifier]
-  O --> A[Deterministic auth and policy]
-  A --> T[Enterprise adapters]
-  T --> M[Supplied mock REST services]
-  T --> L[Legacy XML adapter]
-  M --> D[(Synthetic customer, account, billing data)]
+  C[Customer / support browser]
+
+  subgraph LOCAL[Current local proof of capability]
+    W[HTTP server and secure session cookie]
+    O[Workflow engine]
+    A[Deterministic authentication and authorization]
+    T[Validated enterprise adapters]
+    L[Legacy XML adapter]
+    Z[Reviewer / degraded classifier]
+    E[Structured event and escalation pipeline]
+    F[(Local JSONL events and escalations)]
+    V[Support operations: traces, metrics, escalations]
+    W --> O
+    O --> A
+    A --> T
+    T --> L
+    O --> Z
+    O --> E --> F --> V
+  end
+
+  G[Gemini API via Google AI Studio]
+  M[Supplied mock REST services]
+  D[(Synthetic customer, account, billing, and network data)]
+  C --> W
+  O --> G
+  T --> M --> D
   L --> M
-  O --> E[Structured event / escalation pipeline]
-  E --> F[(JSONL event and escalation stores)]
-  F --> V[/ops traces and metrics/]
+
+  subgraph GCP[Proposed Google Cloud production boundary - not provisioned]
+    EDGE[API Gateway / Apigee]
+    RUN[Cloud Run application and orchestrator]
+    VTX[Vertex AI Gemini]
+    IDP[Identity Platform or CSP identity gateway]
+    SEC[Secret Manager / workload identity]
+    ADAPTER[Controlled enterprise and legacy adapters]
+    DB[(Cloud SQL or Firestore)]
+    BUS[Pub/Sub]
+    OBS[Cloud Logging, Trace, and Monitoring]
+    C --> EDGE --> RUN
+    RUN --> VTX
+    RUN --> IDP
+    RUN --> SEC
+    RUN --> ADAPTER
+    ADAPTER --> ENTERPRISE
+    ADAPTER --> LEGACY
+    RUN --> DB
+    RUN --> BUS --> OBS
+  end
+
+  ENTERPRISE[Production enterprise REST services]
+  LEGACY[Production legacy telecom XML service]
 ```
+
+The diagram separates the runnable local PoC from the proposed GCP production environment. The GCP boundary is a deployment mapping, not infrastructure provisioned by this submission. Production enterprise systems remain outside the application's trust boundary and are reached only through controlled adapters.
 
 Gemini is used for constrained request interpretation only. `cx/engine.py` owns workflow state and calls narrow adapters; it never exposes arbitrary endpoints or model-selected tool execution. Reviewer and degraded modes replace only intent interpretation while continuing through the same control path. State is held in a process-local session map and is therefore non-durable. Model output does not control customer identity, ownership, confirmation, tool permissions, or result claims.
 
@@ -25,7 +67,7 @@ Gemini is used for constrained request interpretation only. `cx/engine.py` owns 
 
 ## Trust boundaries
 
-The browser carries a server-generated, high-entropy HttpOnly, SameSite session cookie. The process maps the opaque identifier to the authenticated synthetic identity and expiry; no client-selected session identifiers are accepted. Authorization runs before the account adapter. Account ownership is checked again against the returned account. Case creation requires an explicit confirmation turn and a time-bucketed idempotency key. Legacy XML is parsed, identity-matched, normalized, and error-mapped before workflow use. Operations APIs require the support-agent role. Events store identifiers and status summaries only, not raw customer text or credentials.
+The browser carries a server-generated, high-entropy HttpOnly, SameSite session cookie. The process maps the opaque identifier to the authenticated synthetic identity and expiry; no client-selected session identifiers are accepted. Chat responses omit the cookie value, and telemetry stores only a stable one-way SHA-256 session reference so events remain correlatable without exposing a usable session credential. Authorization runs before the account adapter. Account ownership is checked again against the returned account. Case creation requires an explicit confirmation turn and a time-bucketed idempotency key. Legacy XML is parsed, identity-matched, normalized, and error-mapped before workflow use. Operations APIs require the support-agent role. Events store status summaries rather than raw customer text or credentials.
 
 ## Gemini CX migration mapping
 

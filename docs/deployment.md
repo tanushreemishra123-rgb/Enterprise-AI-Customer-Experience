@@ -22,6 +22,17 @@ The challenge forum confirms that local in-memory session/workflow state and fil
 
 External calls have bounded timeouts. Idempotent reads retry transient transport failures and selected 429/5xx responses within a small cap. Case create has one retry only after an unavailable response and reuses the same idempotency key. Sessions and JSONL persistence are process-local demonstration choices and must be replaced before horizontal scaling. Use readiness checks for dependencies, controlled rollout, revision rollback, and a documented recovery path for durable pending actions.
 
+Current local timeout/retry defaults are configurable through the process environment:
+
+| Setting | Default | Behavior |
+|---|---:|---|
+| `ENTERPRISE_TIMEOUT` | 4 seconds | Timeout for ordinary enterprise HTTP calls |
+| `LEGACY_TIMEOUT` | 4 seconds | Timeout for legacy XML calls |
+| `MAX_RETRIES` | 1 | Retry cap for eligible idempotent calls; clamped to 0–3 |
+| Gemini request timeout | 8 seconds | Fixed timeout in the live Gemini adapter |
+
+The app reads these variables from the environment; `.env.example` is a reference file and is not loaded automatically.
+
 ## Security and cost
 
 Enforce TLS, secure cookies, CSRF controls, request limits, per-customer rate limits, least-privilege service identities, VPC egress policy, and log redaction. Avoid sending enterprise records to the model unless a reviewed grounding design specifically needs them. Monitor model token use, latency, request volume and retries; use reviewer mode for repeatable CI and demos. Budget limits should alert before they block the service. Roll back by shifting Cloud Run traffic to the previous known-good revision while preserving compatible database schema.

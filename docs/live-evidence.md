@@ -4,7 +4,7 @@ Reviewers will not supply `GEMINI_API_KEY` or paid Google Cloud credentials. The
 
 ## Captured execution evidence
 
-Captured 2026-10-19 using the Gemini live integration. The customer asked, “What internet plan am I currently using?” The UI showed live mode and returned the grounded Fiber 500 account response. The support-agent view showed one Gemini call and zero Gemini failures. The inspected event was gemini.completed, with model gemini-2.5-flash; its session identifier is covered in the saved screenshot.
+Captured 2026-10-19 using the Gemini live integration. The customer asked, “What internet plan am I currently using?” The UI showed live mode and returned the grounded Fiber 500 account response. The support-agent view showed one Gemini call and zero Gemini failures. The inspected event was gemini.completed, with model gemini-2.5-flash. The post-fix trace screenshot has been redacted to hide the session value; new trace screenshots in the reviewer scenario set show the stable hashed `sess-` reference or `system` marker, not a cookie value.
 
 - Customer-facing live response: evidence/screenshots/live-customer-response.png
 - Live support operations and metrics: evidence/screenshots/live-operations-overview.png

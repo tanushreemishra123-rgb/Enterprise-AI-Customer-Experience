@@ -3,6 +3,7 @@ import json
 import re
 import urllib.parse
 import os
+import time
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -61,14 +62,15 @@ def classify(text, trace_id, session_id):
     url=f"https://generativelanguage.googleapis.com/v1beta/models/{urllib.parse.quote(config.GEMINI_MODEL)}:generateContent"
     payload={"contents":[{"parts":[{"text":prompt}]}],"generationConfig":{"responseMimeType":"application/json","responseSchema":_SCHEMA}}
     req=Request(url,data=json.dumps(payload).encode(),headers={"Content-Type":"application/json","x-goog-api-key":config.GEMINI_API_KEY},method="POST")
+    started = time.perf_counter()
     try:
         with urlopen(req,timeout=8) as r: response=json.loads(r.read(64_000))
         result=json.loads(response["candidates"][0]["content"]["parts"][0]["text"])
         result=_validate(result)
-        emit("gemini.completed", trace_id, session_id, "gemini", metadata={"intent":result["intent"],"model":config.GEMINI_MODEL})
+        emit("gemini.completed", trace_id, session_id, "gemini", duration_ms=(time.perf_counter()-started)*1000, metadata={"intent":result["intent"],"model":config.GEMINI_MODEL})
         return result,"live"
     except Exception:
-        emit("gemini.failed", trace_id, session_id, "gemini", "failure", metadata={"reason":"provider_or_validation_failure"})
+        emit("gemini.failed", trace_id, session_id, "gemini", "failure", duration_ms=(time.perf_counter()-started)*1000, metadata={"reason":"provider_or_validation_failure"})
         emit("mode.degraded", trace_id, session_id, "orchestrator", "pending", metadata={"reason":"gemini_unavailable"})
         result=reviewer_intent(text)
         emit("intent.classified", trace_id, session_id, "reviewer-classifier", metadata={"mode":"degraded"})
