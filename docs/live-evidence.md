@@ -1,7 +1,19 @@
 # Live Gemini execution evidence
 
-Reviewers will not supply `GEMINI_API_KEY` or paid Google Cloud credentials. They can run all mandatory workflows through reviewer mode. The live integration is reviewed from code/configuration/schema validation and a participant-captured live execution trace. This package does not currently contain that capture because no participant credential was available in this session.
+Reviewers will not supply `GEMINI_API_KEY` or paid Google Cloud credentials. They can run all mandatory workflows through reviewer mode. The live integration is reviewed from code/configuration/schema validation and a participant-captured live execution trace. A participant-captured live run is included in this package. Reviewers can inspect the screenshots below; no API key, password, cookie, or session identifier is included.
 
+## Captured execution evidence
+
+Captured 2026-10-19 using the Gemini live integration. The customer asked, “What internet plan am I currently using?” The UI showed live mode and returned the grounded Fiber 500 account response. The support-agent view showed one Gemini call and zero Gemini failures. The inspected event was gemini.completed, with model gemini-2.5-flash; its session identifier is covered in the saved screenshot.
+
+- Customer-facing live response: evidence/screenshots/live-customer-response.png
+- Live support operations and metrics: evidence/screenshots/live-operations-overview.png
+- Redacted trace showing gemini.completed and model: evidence/screenshots/live-gemini-completed-trace-redacted.png
+- Reviewer-mode customer response: evidence/screenshots/reviewer-customer-response.png
+- Reviewer-mode support operations; session identifier redacted: evidence/screenshots/reviewer-operations-view-redacted.png
+- Degraded-mode customer response: evidence/screenshots/degraded-fallback-response.png
+
+These screenshots demonstrate the observed local proof of capability. They are not a substitute for rerunning the scenario in a fresh environment.
 ## Capture procedure
 
 1. Configure a valid Gemini API key locally as `GEMINI_API_KEY`; keep it in the process environment and never in source, screenshots, logs, or the submission archive.
