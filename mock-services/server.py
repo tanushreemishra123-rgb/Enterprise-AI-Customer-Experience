@@ -2,7 +2,7 @@ import json, os, time, uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlparse, parse_qs
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 BASE=Path(__file__).resolve().parents[1]
 def load(n): return json.loads((BASE/'sample-data'/n).read_text())
 CUSTOMERS=load('customers.json')['customers'];ACCOUNTS=load('accounts.json')['accounts'];BILLING=load('billing.json')['billing'];OUTAGES=load('network-status.json')['outages'];CASES={};KEYS={}

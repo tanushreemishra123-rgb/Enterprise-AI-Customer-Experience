@@ -2,7 +2,7 @@
 import json
 import time
 import urllib.parse
-import xml.etree.ElementTree as ET
+from defusedxml import ElementTree as ET
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
