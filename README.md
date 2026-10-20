@@ -146,7 +146,7 @@ Mock failure controls are set in the mock service process: `MOCK_AUTH_MODE=expir
 
 Store test output, redacted screenshots, live Gemini evidence, and the demo link in the submission evidence package. The captured scenario screenshots are indexed in [`evidence/screenshots/README.md`](evidence/screenshots/README.md), and the requirement-to-evidence matrix is in [`docs/requirement-to-evidence.md`](docs/requirement-to-evidence.md). The demo video may be included in the submission ZIP or linked from the README; ensure a link is accessible without requesting permission. Never store active credentials, session cookies, or real customer data in the evidence package.
 
-The 3–5 minute demo should show a grounded inquiry, clarification, protected action confirmation, authorization denial, legacy processing, a simulated failure and escalation, traces and event-derived metrics, and reviewer mode. Include live-mode evidence captured with participant credentials.
+**Demo video:** [Watch the Resolution Desk demo on Loom](https://www.loom.com/share/6fac5a07027c4e4ba582d31f8a02fdb9). Ensure the Loom link is accessible to reviewers without requesting permission. The 3–5 minute demo shows a grounded inquiry, clarification, protected action confirmation, authorization denial, legacy processing, a simulated failure and escalation, traces and event-derived metrics, reviewer mode, and live-mode evidence.
 
 ## Architecture, security, and handover
 

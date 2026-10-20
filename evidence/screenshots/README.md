@@ -21,8 +21,8 @@ The screenshots below would make the submission easier to review, but the challe
 - A support-agent view showing the escalation record for the simulated case-service outage.
 - A link or screenshot of the successful GitHub security workflow.
 
-## Required submission item still to complete
+## Demo video
 
-- Record the challenge's demo video and add an accessible link to the root README (or include the video in the submission ZIP). Its recommended duration is 3–5 minutes.
+The 3–5 minute demo is recorded and linked from the [root README](../../README.md): [Watch the Resolution Desk demo on Loom](https://www.loom.com/share/6fac5a07027c4e4ba582d31f8a02fdb9). Confirm that reviewers can open the Loom link without requesting permission.
 
 Do not include API keys, passwords, browser cookies, or raw session IDs in any new screenshot. The session-reference fix uses hashed `sess-` references in trace data; old pre-fix `events.jsonl` logs should not be submitted.

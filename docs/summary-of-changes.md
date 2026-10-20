@@ -37,5 +37,5 @@
 ## Validation and remaining limits
 
 - Verified from the current repository: 29 unit tests passed and all eight mandatory scenarios passed. Current checked-in evidence is in `evidence/unit-tests.txt`, `evidence/scenarios.txt`, and `starter-solution/eval/scenario-results.json`.
-- Live Gemini and reviewer/degraded UI evidence is captured under `evidence/screenshots/`; the challenge demo video remains to be recorded and linked or included in the submission ZIP.
+- Live Gemini and reviewer/degraded UI evidence is captured under `evidence/screenshots/`; the 3–5 minute challenge demo is recorded and linked from the root README and requirement-to-evidence matrix.
 - The PoC uses synthetic data and local mocks. Sessions/idempotency are in memory, telemetry/escalations use local JSONL, and Google Cloud deployment is documented but not provisioned. See `docs/known-gaps.md` for the production roadmap.

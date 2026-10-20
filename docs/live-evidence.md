@@ -23,4 +23,4 @@ These screenshots demonstrate the observed local proof of capability. They are n
 5. Save a redacted screenshot or short screen recording showing the configured model name, mode, customer-visible response, and trace ID. Do not expose the key, cookie, or password.
 6. Add a brief evidence note with capture date, model identifier, scenario, trace ID, and expected/observed result. Do not present reviewer-mode traces as live Gemini evidence.
 
-The challenge allows the recommended 3–5 minute demo video to be placed in the ZIP or shared as an accessible link. The package has not yet recorded a video; capture it after live evidence and reviewer scenarios are complete.
+The 3–5 minute demo video is recorded and linked from the [root README](../README.md): [Watch the Resolution Desk demo on Loom](https://www.loom.com/share/6fac5a07027c4e4ba582d31f8a02fdb9). Confirm that reviewers can open the Loom link without requesting permission.
